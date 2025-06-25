@@ -1,2 +1,0 @@
-wwwroot\map.html
-wwwroot\ProtectedSpase.html
