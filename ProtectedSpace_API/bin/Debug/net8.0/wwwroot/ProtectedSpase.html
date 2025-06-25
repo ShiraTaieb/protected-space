@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="utf-8" />
+    <title>מציאת 10 המקומות הקרובים</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 6px;
+            direction: rtl;
+        }
+    </style>
+</head>
+<body>
+    <h2>בחר מיקום במפה, הזן תעודת זהות ובחר אמצעי הגעה</h2>
+    <div id="map"></div>
+
+    <form id="searchForm">
+        <label>תעודת זהות: <input type="text" id="userId" required></label><br><br>
+
+        <label>
+            <input type="checkbox" name="driving" id="driving" />
+            חיפוש לפי נסיעה ברכב (אם לא מסומן - ברגל)
+        </label><br><br>
+        <button type="submit">מצא 10 המקומות הקרובים</button>
+    </form>
+
+    <h3>תוצאות:</h3>
+    <div id="results"></div>
+
+    <script>
+        let map;
+        let latitude = 32.0853;  // מרכז התצוגה הראשונית (ת"א)
+        let longitude = 34.7818;
+        let marker;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: latitude, lng: longitude },
+                zoom: 10,
+            });
+
+            marker = new google.maps.Marker({
+                position: { lat: latitude, lng: longitude },
+                map: map,
+                draggable: true,
+            });
+
+            // עדכון מיקום בעת גרירת הסמן
+            marker.addListener("dragend", (e) => {
+                latitude = e.latLng.lat();
+                longitude = e.latLng.lng();
+            });
+
+            // עדכון מיקום בלחיצה במפה
+            map.addListener("click", (e) => {
+                latitude = e.latLng.lat();
+                longitude = e.latLng.lng();
+                marker.setPosition(e.latLng);
+            });
+        }
+
+        document.getElementById("searchForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            let userId = document.getElementById("userId").value.trim();
+
+            // בדיקה בסיסית: ת"ז חייבת להיות 9 ספרות בלבד
+            while (!/^\d{9}$/.test(userId)) {
+                alert("אנא הזן תעודת זהות בת 9 ספרות בלבד");
+                userId = prompt("אנא הזן תעודת זהות בת 9 ספרות בלבד:");
+                if (userId === null) {
+                    // אם המשתמש לחץ ביטול, הפסק שליחת הטופס
+                    return;
+                }
+                userId = userId.trim();
+                document.getElementById("userId").value = userId;
+            }
+
+            const driving = document.getElementById("driving").checked;
+
+            // קריאה ל-API עם הפרמטרים כולל ת"ז ב-query
+            const url = `https://localhost:7132/api/Address/ProtectedSpace/${latitude}/${longitude}?driving=${driving}&id=${userId}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("שגיאה בשרת");
+
+                const addresses = await response.json();
+
+                // הצגת התוצאות בטבלה
+                let html = `<table>
+                    <tr><th>איש קשר</th><th>טלפון</th><th>קיבולת</th><th>כתובת (Latitude, Longitude)</th></tr>`;
+
+                addresses.forEach(addr => {
+                    html += `<tr>
+                        <td>${addr.contactPerson ?? ''}</td>
+                        <td>${addr.phoneNumber ?? ''}</td>
+                        <td>${addr.capacity ?? ''}</td>
+                        <td>${addr.latitude?.toFixed(6) ?? ''}, ${addr.longitude?.toFixed(6) ?? ''}</td>
+                    </tr>`;
+                });
+
+                html += `</table>`;
+                document.getElementById("results").innerHTML = html;
+
+            } catch (err) {
+                
+                alert("אירעה שגיאה בטעינת הנתונים: " + err.message);
+            }
+        });
+    </script>
+
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAmVDk3IM1RiN1jIlZCNKWtt8xqLgLK41I&callback=initMap">
+    </script>
+</body>
+</html>
