@@ -14,7 +14,8 @@ namespace Core.Mapping
        public MapperProfile() 
         {
             //1
-            CreateMap<TypeStructure, TypeStructureResources>().ReverseMap();
+            CreateMap<TypeStructure, TypeStructureResources>();
+            CreateMap<TypeStructureResources, TypeStructure>();
             //2
             //מהמסד החוצה
             //DEST=יעד-TypeStructureResources
@@ -28,7 +29,10 @@ namespace Core.Mapping
             CreateMap<OpinionResources, Opinion>().ForMember(dest => dest.Address, origin => origin.Ignore());
             //3
             //מהמסד החוצה
-            CreateMap<Address, AddressResources>();
+            CreateMap<Address, AddressResources>().ForMember(dest => dest.TypeStructureName,
+             opt => opt.MapFrom(src => src.TypeStructure.Name));
+
+
             //מבחוץ למסד
             CreateMap<AddressResources,Address>().ForMember(dest=>dest.TypeStructure, origin => origin.Ignore());
         }

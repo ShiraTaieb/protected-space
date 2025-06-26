@@ -14,7 +14,7 @@ namespace Dal_Repository_Infrastructor.Repository
         public  Repository_Address(ProtectedSpace_context context) :base(context){ }
         public async Task<List<Address>> getAllAsync()
         {
-            return await DbContext.Address.ToListAsync();
+            return await DbContext.Address.Include(a=>a.TypeStructure).ToListAsync();
         }
 
         public Task<Address> getById(int id)

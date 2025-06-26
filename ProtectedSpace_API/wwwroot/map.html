@@ -20,7 +20,15 @@
         <label>טלפון: <input type="text" name="PhoneNumber" required></label><br>
         <label>קיבולת: <input type="text" name="Capacity" required></label><br>
         <label>כמות נוכחית: <input type="number" name="CurrentNumberOfPeople" value="0"></label><br>
-        <label>מזהה מבנה (TypeStructureId): <input type="number" name="TypeStructureId" required></label><br>
+
+        <!-- רשימה נגללת של סוגי מבנים -->
+        <label>
+            סוג מבנה:
+            <select name="TypeStructureId" id="typeStructureSelect" required>
+                <option value="">בחר סוג מבנה</option>
+            </select>
+        </label><br>
+
         <label>פתוח? <input type="checkbox" name="Open"></label><br>
         <input type="submit" value="שמור כתובת">
     </form>
@@ -29,14 +37,13 @@
         let map;
         let latitude = 0;
         let longitude = 0;
+        let marker;
 
         function initMap() {
             map = new google.maps.Map(document.getElementById("map"), {
                 center: { lat: 32.0853, lng: 34.7818 },
                 zoom: 10,
             });
-
-            let marker;
 
             map.addListener("click", (e) => {
                 latitude = e.latLng.lat();
@@ -53,19 +60,35 @@
             });
         }
 
+        // טעינת סוגי מבנים מהשרת
+        async function loadTypeStructures() {
+            try {
+                const res = await fetch("https://localhost:7132/api/TypeStructure");
+                if (!res.ok) throw new Error("שגיאה בטעינת סוגי מבנים");
+                const types = await res.json();
+
+                const select = document.getElementById("typeStructureSelect");
+                types.forEach(type => {
+                    const option = document.createElement("option");
+                    option.value = type.id;
+                    option.textContent = type.name;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        // שליחת טופס
         document.getElementById("addressForm").addEventListener("submit", async function (e) {
             e.preventDefault();
 
-            // לולאה לבדוק תקינות ת"ז עד שמתקבלת ת"ז בת 9 ספרות
             let userId = document.getElementById("userId").value.trim();
 
             while (!/^\d{9}$/.test(userId)) {
                 alert("אנא הזן תעודת זהות בת 9 ספרות בלבד");
                 userId = prompt("אנא הזן תעודת זהות בת 9 ספרות בלבד:");
-                if (userId === null) {
-                    // אם המשתמש לחץ ביטול, הפסק שליחת הטופס
-                    return;
-                }
+                if (userId === null) return;
                 userId = userId.trim();
                 document.getElementById("userId").value = userId;
             }
@@ -91,15 +114,17 @@
 
             if (response.ok) {
                 alert("הכתובת נשמרה בהצלחה!");
-                // אפשר לאפס טופס ומפה לפי הצורך
                 this.reset();
-                if (typeof marker !== "undefined") {
-                    marker.setMap(null);
-                }
+                if (marker) marker.setMap(null);
             } else {
                 const errorText = await response.text();
                 alert("שגיאה בשמירת הכתובת: " + errorText);
             }
+        });
+
+        // טען את סוגי המבנים עם פתיחת הדף
+        window.addEventListener("DOMContentLoaded", () => {
+            loadTypeStructures();
         });
     </script>
 

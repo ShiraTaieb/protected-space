@@ -25,7 +25,7 @@ namespace Bll_Service.Services
         public Task<List<TypeStructure>> getAllAsync()
         {
             //DALקריאה לפונקציית הגישה ב
-            throw new NotImplementedException();
+            return _repository_TypeStructure.getAllAsync();
         }
 
         public Task<TypeStructure> getById(int id)

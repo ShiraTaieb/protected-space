@@ -12,6 +12,7 @@ namespace Core.Resources__Dto
         public int Id { get; set; }
         //ניתן להוסיף שם מבנה ועוד פרטים.. 
         public int TypeStructureId { get; set; }//מפתח זר לטבלת סוגי מבנים
+       public string? TypeStructureName { get; set; }
         public bool Open { get; set; }
         public string ContactPerson { get; set; }//איש ליצירת קשר
         public string PhoneNumber { get; set; }

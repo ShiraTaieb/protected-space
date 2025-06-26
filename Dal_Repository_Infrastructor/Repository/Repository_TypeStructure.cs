@@ -1,5 +1,6 @@
 ﻿using Core.models;
 using Core.Repository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,11 @@ namespace Dal_Repository_Infrastructor.Repository
     public class Repository_TypeStructure : Repository_Data, IRepository_TypeStructure
     {
         public Repository_TypeStructure(ProtectedSpace_context context):base(context) { }
-        public Task<List<TypeStructure>> getAllAsync()
+        public async Task<List<TypeStructure>> getAllAsync()
         {
-            throw new NotImplementedException();
+            return await DbContext.TypeStructure.ToListAsync();
         }
+        
 
         public Task<TypeStructure> getById(int id)
         {

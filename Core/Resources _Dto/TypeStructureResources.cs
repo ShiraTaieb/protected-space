@@ -7,7 +7,7 @@ using static Core.models.TypeStructure;
 
 namespace Core.Resources__Dto
 {
-    internal class TypeStructureResources
+    public class TypeStructureResources
     {
         public int Id { get; set; }
         public string Name { get; set; }

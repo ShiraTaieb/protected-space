@@ -1,0 +1,7 @@
+# Force GitHub to recognize C# as the main language
+*.cs linguist-detectable=true
+
+# Ignore irrelevant folders
+bin/ linguist-vendored
+obj/ linguist-vendored
+.vs/ linguist-vendored

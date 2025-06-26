@@ -1,1 +1,10 @@
+# Ignore build and system folders
+bin/
+obj/
 .vs/
+*.user
+*.suo
+*.dll
+*.exe
+*.pdb
+*.log
